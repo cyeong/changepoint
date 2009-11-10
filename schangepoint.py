@@ -4,6 +4,7 @@
 #                   :   using CUMSUM estimation.  Based on the discussions on:
 #                   :   http://www.variation.com/cpa/tech/changepoint.html
 #Created            :   August 19, 2009
+#temp
 
 import numpy, random, sys
 
@@ -14,7 +15,7 @@ def readfile(filename):
     Notes:          Does not check for errors
     """
     
-    lines=[float(line.strip()) for line in file(filename)]
+    lines = [float(line.strip()) for line in file(filename)]
     return lines
   
 def cumsums(data):
@@ -24,25 +25,26 @@ def cumsums(data):
     """
     
     series_average = numpy.average(data)
-    cumsums=[]
-    cumsums.append(0)
+    csums = []
+    csums.append(0)
     
     for i in range(0, len(data)):
-        cumsums.append( (data[i] - series_average) + cumsums[i])
+        csums.append( (data[i] - series_average) + csums[i])
         
-    return cumsums    
+    return csums    
 
 def randomize(data):
     #Magnus L Hetland's solution, (s4)
-    #copied from http://mail.python.org/pipermail/python-list/1999-August/009741.html
+    #copied from 
+	#http://mail.python.org/pipermail/python-list/1999-August/009741.html
     #original was destructive, new makes a copy of the list.
-    list = []
-    list.extend(data)
+    temp_list = []
+    temp_list.extend(data)
     
     result = []
-    for i in range(len(list)):
-        element = random.choice(list)
-        list.remove(element)
+    for i in range(len(temp_list)):
+        element = random.choice(temp_list)
+        temp_list.remove(element)
         result.append(element)
     return result
     
@@ -80,18 +82,18 @@ def find_index_of_maximum(cumsum):
     """
     Description:  Find the index of the maximum value from the cummulative sums
     """
-    max = sys.float_info.min
+    max_number = sys.float_info.min
     max_index = 0
     abs_vals = [abs(x) for x in cumsum]
 
-    for (i,num) in enumerate(abs_vals):
-        if num > max:
-            max = num
+    for (i, num) in enumerate(abs_vals):
+        if num > max_number:
+            max_number = num
             max_index = i
         
     return max_index
  
-def get_changepoints(data,change_points,confidence_level=90,offset=0):
+def get_changepoints(data, change_points, confidence_level = 90, offset = 0):
     """
     Description:    Call the function by passing a data series 
                     Once a change has been detected, break the data into two segments,
@@ -101,7 +103,7 @@ def get_changepoints(data,change_points,confidence_level=90,offset=0):
     if not change_points:
         change_points = []
 
-    confidence = bootstrap(data,1000)
+    confidence = bootstrap(data, 1000)
     if (confidence > confidence_level):
         cumsum = cumsums(data)
         max_index = find_index_of_maximum(cumsum)
@@ -111,17 +113,17 @@ def get_changepoints(data,change_points,confidence_level=90,offset=0):
         change_points.extend([max_index + offset])
 
         #split the data into two, and calculate change points
-        get_changepoints(data[:max_index],change_points,confidence_level,offset)
-        get_changepoints(data[max_index:],change_points,confidence_level,offset+max_index-1)
+        get_changepoints(data[:max_index], change_points, confidence_level, offset)
+        get_changepoints(data[max_index:], change_points, confidence_level, offset + max_index - 1)
 
     return change_points
         
     
 def main():
     data = readfile("data.dat")
-    cp = []
-    x = get_changepoints(data, cp)
-    print x
+    change_points = []
+    points = get_changepoints(data, change_points)
+    print points
     
 if __name__ == '__main__':
-     main() 
+    main() 
